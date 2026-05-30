@@ -1,0 +1,20 @@
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+
+}
+
+
+
+/* header section */
+.card{
+  text-align: center;
+}
+
+.title{
+  font-size: 5rem;
+  /* text-align: center */;
+  margin: 25px;
+  color: orange;
+}
