@@ -16,6 +16,7 @@ function App() {
 
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState(null);
   //riuso la funzione di debounce
   const debouncedFetch = useCallback(
     debounce((text) => {
@@ -32,10 +33,18 @@ function App() {
 
   useEffect(() => {
     debouncedFetch(query);
-  },[query, debouncedFetch]);
+  }, [query, debouncedFetch]);
   console.log("Stato attuale -> Query:", query, "Suggerimenti:", suggestions);
 
-
+  const fetchProductDetails = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`)
+      const data = await res.json();
+      setSelectedProducts(data);
+    } catch (error) {
+      console.error(error)
+    }
+  }
   return (
     <>
       <div className='card'>
@@ -49,10 +58,12 @@ function App() {
           {query.length > 0 && (
             <ul>
               {suggestions.map((i) => (
-                <li key={i.id}>{i.name}
-                  <img src={i.image}
-                    alt={i.name}
-                  />
+                <li key={i.id} onClick={() => {
+                  fetchProductDetails(i.id); 
+                  setQuery('');              
+                  setSuggestions([]);       
+                }}>{i.name}
+
                 </li>
               ))}
             </ul>
@@ -60,6 +71,14 @@ function App() {
         </div>
 
       </div>
+      {selectedProducts && (
+        <div className='selectedCard'>
+          <h2>{selectedProducts.name}</h2>
+          <img src={selectedProducts.image} alt={selectedProducts.name} />
+          <p>{selectedProducts.description}</p>
+          <p><strong>Prezzo: </strong> {selectedProducts.price} €</p>
+        </div>
+      )}
 
     </>
   )
@@ -67,10 +86,15 @@ function App() {
 
 export default App
 
-/* 📌 Milestone 2: Implementare il Debounce per Ottimizzare la Ricerca
+/* 🎯 Bonus: Caricare i Dettagli del Prodotto Selezionato
 
-    Attualmente, ogni pressione di tasto esegue una richiesta API. Questo è inefficiente!
-    Implementa una funzione di debounce per ritardare la chiamata API fino a quando l’utente smette di digitare per un breve periodo (es. 300ms)
-    Dopo l’implementazione, verifica che la ricerca non venga eseguita immediatamente a ogni tasto premuto, ma solo dopo una breve pausa.
+    Quando l’utente clicca su un prodotto nella tendina, nascondi la tendina e carica i dettagli completi del prodotto sotto il campo di ricerca.
 
-Obiettivo: Ridurre il numero di richieste API e migliorare le prestazioni. */
+    Effettua una richiesta API per ottenere i dettagli completi:
+    /products/{id}
+
+    Mostra i dettagli del prodotto selezionato (es. image, name, description, price).
+
+
+Obiettivo: Aggiungere interattività permettendo di visualizzare le informazioni complete di un prodotto.
+ */
